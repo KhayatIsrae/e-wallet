@@ -21,7 +21,7 @@ const database = {
             }
         },
         {
-            id: "1",
+            id: "2",
             name: "Israe",
             email: "Ali@example.com",
             password: "1232",
@@ -48,5 +48,9 @@ const finduserbymail = (mail, password) => {
     );
 }
 
+const getUserById=(id)=>database.users.find((user)=>user.id===id);
+
+
+
 const allUsers=database.users;
-export default {finduserbymail,allUsers};
+export default {finduserbymail,allUsers,getUserById};
