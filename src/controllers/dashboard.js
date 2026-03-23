@@ -1,15 +1,18 @@
-import db from "../models/database.js";
+import {getbeneficiaries ,finduserbyaccount,findbeneficiarieByid} from "../Model/database.js";
 
-let user = localStorage.getItem('currentUser');
+const user = JSON.parse(sessionStorage.getItem("currentUser"));
 if (!user) {
+    alert("User not authenticated");
     document.location = '../views/login.html';
 }
-user = JSON.parse(user);
-const users = db.allUsers;
+
+//const users = db.allUsers;
 const greetingName = document.getElementById('greetingName');
+const currentDate = document.getElementById("currentDate");
 const availableBalance = document.getElementById('availableBalance');
 const monthlyIncome = document.getElementById('monthlyIncome');
 const monthlyExpenses = document.getElementById('monthlyExpenses');
+const transactionsList = document.getElementById("recentTransactionsList");
 const activeCards = document.getElementById('activeCards');
 const quickTransferbtn = document.getElementById('quickTransfer');
 const transfersection = document.getElementById('transfer-section');
@@ -30,6 +33,8 @@ monthlyIncome.textContent = Ctransactions.reduce((acc, curr) => acc + curr.amoun
 let Dtransactions = user.wallet.transactions.filter((t) => t.type === 'debit');
 monthlyExpenses.textContent = Dtransactions.reduce((acc, curr) => acc + curr.amount, 0);
 activeCards.textContent = user.wallet.cards.length;
+currentDate.innerText= new Date().toLocaleDateString("fr-FR");
+
 
 //transfert
 quickTransferbtn.addEventListener('click', () => transfersection.setAttribute('class', 'transfer-section'));
