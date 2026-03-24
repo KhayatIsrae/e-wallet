@@ -1,4 +1,4 @@
-import {getbeneficiaries ,finduserbyaccount,findbeneficiarieByid} from "../Model/database.js";
+import { getbeneficiaries, finduserbyaccount, findbeneficiarieByid } from "../models/database.js";
 
 const user = JSON.parse(sessionStorage.getItem("currentUser"));
 if (!user) {
@@ -33,7 +33,19 @@ monthlyIncome.textContent = Ctransactions.reduce((acc, curr) => acc + curr.amoun
 let Dtransactions = user.wallet.transactions.filter((t) => t.type === 'debit');
 monthlyExpenses.textContent = Dtransactions.reduce((acc, curr) => acc + curr.amount, 0);
 activeCards.textContent = user.wallet.cards.length;
-currentDate.innerText= new Date().toLocaleDateString("fr-FR");
+currentDate.innerText = new Date().toLocaleDateString("fr-FR");
+// Display transactions
+transactionsList.innerHTML = "";
+user.wallet.transactions.forEach(transaction => {
+    const transactionItem = document.createElement("div");
+    transactionItem.className = "transaction-item";
+    transactionItem.innerHTML = `
+    <div>${transaction.date}</div>
+    <div>${transaction.amount} MAD</div>
+    <div>${transaction.type}</div>
+  `;
+    transactionsList.appendChild(transactionItem);
+});
 
 
 //transfert
@@ -41,9 +53,9 @@ quickTransferbtn.addEventListener('click', () => transfersection.setAttribute('c
 closeTransferBtn.addEventListener('click', () => transfersection.setAttribute('class', 'hidden'));
 
 //affichage beneficiares
-users.forEach(u => {
+user.wallet.beneficiaries.forEach(u => {
     let opt = document.createElement('option');
-    opt.setAttribute('value', u.id);
+    opt.setAttribute('value', u.account);
     opt.textContent = u.name;
     bselect.appendChild(opt);
 
@@ -53,7 +65,7 @@ users.forEach(u => {
 user.wallet.cards.forEach((card) => {
     let opt = document.createElement('option');
     opt.setAttribute('value', card.numcards);
-    opt.textContent = card.numcards;
+    opt.textContent = card.type + "****" + card.numcards;
     sourceCardSelect.appendChild(opt);
 })
 
@@ -62,84 +74,97 @@ cancelTransferBtn.addEventListener('click', () => transfersection.setAttribute('
 
 //effectuer le transfert
 
-const valider = () => {
-    alert('transaction valide!!!');
-    localStorage.setItem('currentUser', JSON.stringify(user));
-    const index = db.allUsers.findIndex(u => u.id === user.id);
-    if(index !== -1){
-        db.allUsers[index] = user;
-        localStorage.setItem('allUsers', JSON.stringify(db.allUsers));
-    }
+//check if beneficiary is valid
+const verifyBen = (numcompte, callback) => {
+        console.log("arrive!")
+        const beneficiary = finduserbyaccount(numcompte);
+        if (beneficiary) {
+            callback(beneficiary);
+        }
+        else {
+            alert("beneficiary not found");
+        }
+    
+}
 
+const checkSolde = (mont, carte, callback) => {
+    
+        if (user.wallet.balance >= mont) {
+            callback("Sufficient balance");
+        } else {
+            alert("Insufficient balance");
+        }
+    
+}
+
+const debiter = (ben, mont, callback) => {
+    
+        ben.wallet.balance -= mont;
+        callback("update balance done");
+    
 
 }
-const debiter = (ben, mont, carte, callback) => {
-    ben.wallet.balance -= mont;
-    let cd = ben.wallet.cards.find((card) => card.numcards === carte);
-    cd.balance -= mont;
-    callback();
+const credit = (benacc, mont, callback) => {
+    
+        let ben = finduserbyaccount(benacc);
+        ben.wallet.balance += mont;
+        callback();
+    
 }
-const credit = (benId, mont, callback) => {
-    let benef = db.getUserById(benId);
-    benef.wallet.balance += mont;
-    callback();
-}
+
 //transaction credit
-const creerTC = (ben, mont, card, callback) => {
-    let benef = db.getUserById(ben);
+const creerTC = (benacc, mont, card, callback) => {
+    let benef = finduserbyaccount(benacc);
     const transaction = {
         id: Math.random(),
         type: 'credit',
         amount: mont,
-        date: new Date().toISOString().slice(0, 10),
+        date: new Date().toLocaleString(),
         from: card,
         to: benef.name
     }
     benef.wallet.transactions.push(transaction);
-    callback();
+    callback("transaction added successfully");
 }
 //transaction debit
-const creerTD = (ben, mont, carte, callback) => {
-    let benef = db.getUserById(ben);
+const creerTD = (benacc, mont, carte, callback) => {
+    let benef = finduserbyaccount(benacc);
     const transaction = {
         id: Math.random(),
         type: 'debit',
         amount: mont,
-        date: new Date().toISOString().slice(0, 10),
+        date: new Date().toLocaleString(),
         from: carte,
         to: benef.name
     }
     user.wallet.transactions.push(transaction);
-    callback();
+    callback("transaction added successfully");
 }
 
-const verifyBen = (id, callback) => {
-    if (db.getUserById(id)) {
-        callback();
-    }
+const valider = () => {
+    
+    alert("transaction reussi!!!");
+    sessionStorage.setItem("currentUser", JSON.stringify(user));
+    location.reload();
+
 }
 
-const checkSolde = (mont, carte, callback) => {
-    let cd = user.wallet.cards.find((card) => card.numcards === carte)
-    if (cd.balance >= mont) callback();
-}
-
-submitTransferBtn.addEventListener('click', () => handleTransfert(checkSolde));
+submitTransferBtn.addEventListener('click', () => handleTransfert(verifyBen));
 
 function handleTransfert(callback) {
-    let benId = bselect.value;
+    let benacc = bselect.value;
     let carte = sourceCardSelect.value;
     let mont = parseFloat(amount.value);
     let amt = mont;
     if (instantTransfer.checked) {
         amt += 13.4;
     }
-    callback(amt, carte, () =>
-        verifyBen(benId, () =>
-            creerTC(benId, mont, carte, () =>
-                creerTD(benId, amt, carte, () =>
-                    debiter(user, amt, carte, () =>
-                        credit(benId, mont, valider)
+    callback(benacc, (beneficiary) =>
+        checkSolde(amt, carte, () =>
+            creerTC(benacc, mont, carte, () =>
+                creerTD(benacc, amt, carte, () =>
+                    debiter(user, amt, () =>
+                        credit(benacc, mont, valider)
                     )
                 )
             )
