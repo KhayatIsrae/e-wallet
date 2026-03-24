@@ -73,7 +73,7 @@ user.wallet.cards.forEach((card) => {
 cancelTransferBtn.addEventListener('click', () => transfersection.setAttribute('class', 'hidden'));
 
 //effectuer le transfert
-
+/*
 //check if beneficiary is valid
 const verifyBen = (numcompte, callback) => {
         console.log("arrive!")
@@ -171,3 +171,92 @@ function handleTransfert(callback) {
         )
     );
 }
+*/
+
+const valider = () => {
+    alert("transaction reussi!!!");
+    sessionStorage.setItem("currentUser", JSON.stringify(user));
+    location.reload();
+}
+
+
+const verifyBen = (numcompte) => new Promise((resolve, reject) => {
+    setTimeout(() => {
+        alert("test!")
+        const beneficiary = finduserbyaccount(numcompte);
+        beneficiary ? resolve() : reject("Bénéficiaire introuvable");
+    }, 2000);
+});
+
+const checkSolde = (mont) => new Promise((resolve, reject) => {
+    setTimeout(() => {
+        user.wallet.balance >= mont
+            ? resolve()
+            : reject("Solde insuffisant");
+    }, 3000);
+});
+
+const debiter = (mont) => new Promise((resolve) => {
+    setTimeout(() => {
+        user.wallet.balance -= mont;
+        resolve();
+    }, 200);
+});
+
+const credit = (benacc, mont) => new Promise((resolve) => {
+    setTimeout(() => {
+        const ben = finduserbyaccount(benacc);
+        ben.wallet.balance += mont;
+        resolve();
+    }, 200);
+});
+
+//transaction credit
+const creerTC = (benacc, mont, card) => {
+    let benef = finduserbyaccount(benacc);
+    const transaction = {
+        id: Math.random(),
+        type: 'credit',
+        amount: mont,
+        date: new Date().toLocaleString(),
+        from: card,
+        to: benef.name
+    }
+    benef.wallet.transactions.push(transaction);
+}
+//transaction debit
+const creerTD = (benacc, mont, carte) => {
+    let benef = finduserbyaccount(benacc);
+    const transaction = {
+        id: Math.random(),
+        type: 'debit',
+        amount: mont,
+        date: new Date().toLocaleString(),
+        from: carte,
+        to: benef.name
+    }
+    user.wallet.transactions.push(transaction);
+}
+
+function handleTransfert() {
+    const benacc = bselect.value;
+    const carte = sourceCardSelect.value;
+    const mont = parseFloat(amount.value);
+    const amt = instantTransfer.checked ? mont + 13.4 : mont;
+
+    verifyBen(benacc)
+        .then(() => checkSolde(amt))
+        .then(() => {
+            creerTC(benacc, mont, carte);
+            creerTD(benacc, amt, carte);
+            return debiter(amt);
+        })
+        .then(() => credit(benacc, mont))
+        .then(() => valider())
+        .catch(erreur => alert(erreur));
+}
+submitTransferBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    alert("test1")
+    handleTransfert();
+});
