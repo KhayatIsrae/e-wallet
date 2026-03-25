@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,9 +8,10 @@
   <link rel="stylesheet" href="/src/css/styles.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
+
 <body>
   <!-- Header avec navigation spécifique au dashboard -->
-<header>
+  <header>
     <nav class="navbar">
       <a href="/index.html" class="logo">
         <img src="/assets/e-Wallet6.gif" alt="Logo E-Wallet">
@@ -22,7 +24,7 @@
   <!-- Main Dashboard -->
   <main class="dashboard-main">
     <div class="dashboard-container">
-      
+
       <!-- Sidebar Navigation -->
       <aside class="dashboard-sidebar">
         <nav class="sidebar-nav">
@@ -64,7 +66,7 @@
 
       <!-- Main Content Area -->
       <div class="dashboard-content">
-        
+
         <!-- Vue d'ensemble (Overview) -->
         <section id="overview" class="dashboard-section active">
           <div class="section-header">
@@ -154,7 +156,7 @@
               <i class="fas fa-plus"></i> Ajouter une carte
             </button>
           </div>
-          
+
           <div class="cards-grid" id="cardsGrid">
             <div class="card-item">
               <div class="card-preview visa">
@@ -179,78 +181,130 @@
           </div>
         </section>
 
-<div>
-        <!-- Section Transferts (masquée par défaut) -->
-<section id="transfer-section" class="transfer-section hidden">
-  <div class="section-header">
-    <h2>Effectuer un transfert</h2>
-    <button class="btn btn-close" id="closeTransferBtn">
-      <i class="fas fa-times"></i>
-    </button>
-  </div>
-  
-  <div class="transfer-container">
-    <!-- Formulaire de transfert -->
-    <form id="transferForm" class="transfer-form">
-      <!-- Sélection du bénéficiaire -->
-      <div class="form-group">
-        <label for="beneficiary">
-          <i class="fas fa-user"></i> Bénéficiaire
-        </label>
-        <select id="beneficiary" name="beneficiary" required>
-          <option value="" disabled selected>Choisir un bénéficiaire</option>
-        </select>
-      </div>
+        <div>
+          <!-- Section recharger (masquée par défaut) -->
+          <section id="charger-section" class="transfer-section hidden ">
+            <div class="section-header">
+              <h2>Effectuer un chargement</h2>
+              <button class="btn btn-close" id="closeChargerBtn">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
 
-      <!-- Sélection de la carte source -->
-      <div class="form-group">
-        <label for="sourceCard">
-          <i class="fas fa-credit-card"></i> Depuis ma carte
-        </label>
-        <select id="sourceCard" name="sourceCard" required>
-          <option value="" disabled selected>Sélectionner une carte</option>
-        </select>
-      </div>
+            <div class="transfer-container">
+              <!-- Formulaire de transfert -->
+              <form id="chargerForm" class="transfer-form">
+                <!-- Sélection de la carte source -->
+                <div class="form-group">
+                  <label for="sourceCard">
+                    <i class="fas fa-credit-card"></i> Depuis ma carte
+                  </label>
+                  <select id="sourceCardCharger" name="sourceCard" required>
+                    <option value="" disabled selected>Sélectionner une carte</option>
+                  </select>
+                </div>
 
-      <!-- Montant du transfert -->
-      <div class="form-group">
-        <label for="amount">
-          <i class="fas fa-euro-sign"></i> Montant
-        </label>
-        <div class="amount-input">
-          <input type="number" id="amount" name="amount" min="1" step="0.01" placeholder="0.00" required>
-          <span class="currency">MAD</span>
+                <!-- Montant du transfert -->
+                <div class="form-group">
+                  <label for="amount">
+                    <i class="fas fa-euro-sign"></i> Montant
+                  </label>
+                  <div class="amount-input">
+                    <input type="number" id="amountCharger" name="amount" min="1" step="0.01" placeholder="0.00" required>
+                    <span class="currency">MAD</span>
+                  </div>
+                </div>
+
+                <!-- Boutons d'action -->
+                <div class="form-actions">
+                  <button type="button" class="btn btn-secondary" id="cancelChargerBtn">
+                    Annuler
+                  </button>
+                  <button type="submit" class="btn btn-primary" id="submitChargerBtn">
+                    <i class="fas fa-paper-plane"></i> charger
+                  </button>
+                </div>
+              </form>
+            </div>
+          </section>
         </div>
-      </div>
 
-      <!-- Options supplémentaires -->
-      <div class="form-options">
-        <div class="checkbox-group">
-          <input type="checkbox" id="saveBeneficiary" name="saveBeneficiary">
-          <label for="saveBeneficiary">Enregistrer ce bénéficiaire</label>
-        </div>
-        
-        <div class="checkbox-group">
-          <input type="checkbox" id="instantTransfer" name="instantTransfer">
-          <label for="instantTransfer">Transfert instantané <span class="fee-badge">+13.4 MAD</span></label>
-        </div>
-      </div>
-      <!-- Boutons d'action -->
-      <div class="form-actions">
-        <button type="button" class="btn btn-secondary" id="cancelTransferBtn">
-          Annuler
-        </button>
-        <button type="submit" class="btn btn-primary" id="submitTransferBtn">
-          <i class="fas fa-paper-plane"></i> Transférer
-        </button>
-      </div>
-    </form>
-    </div>
-  <!-- Footer -->
-  <footer>
-    <p>&copy; 2026 E-Wallet. Tous droits réservés.</p>
-  </footer>
 
-  <script type="module" src="/src/controllers/dashboard.js"></script>
+        <div>
+          <!-- Section Transferts (masquée par défaut) -->
+          <section id="transfer-section" class="transfer-section hidden">
+            <div class="section-header">
+              <h2>Effectuer un transfert</h2>
+              <button class="btn btn-close" id="closeTransferBtn">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+
+            <div class="transfer-container">
+              <!-- Formulaire de transfert -->
+              <form id="transferForm" class="transfer-form">
+                <!-- Sélection du bénéficiaire -->
+                <div class="form-group">
+                  <label for="beneficiary">
+                    <i class="fas fa-user"></i> Bénéficiaire
+                  </label>
+                  <select id="beneficiary" name="beneficiary" required>
+                    <option value="" disabled selected>Choisir un bénéficiaire</option>
+                  </select>
+                </div>
+
+                <!-- Sélection de la carte source -->
+                <div class="form-group">
+                  <label for="sourceCard">
+                    <i class="fas fa-credit-card"></i> Depuis ma carte
+                  </label>
+                  <select id="sourceCard" name="sourceCard" required>
+                    <option value="" disabled selected>Sélectionner une carte</option>
+                  </select>
+                </div>
+
+                <!-- Montant du transfert -->
+                <div class="form-group">
+                  <label for="amount">
+                    <i class="fas fa-euro-sign"></i> Montant
+                  </label>
+                  <div class="amount-input">
+                    <input type="number" id="amount" name="amount" min="1" step="0.01" placeholder="0.00" required>
+                    <span class="currency">MAD</span>
+                  </div>
+                </div>
+
+                <!-- Options supplémentaires -->
+                <div class="form-options">
+                  <div class="checkbox-group">
+                    <input type="checkbox" id="saveBeneficiary" name="saveBeneficiary">
+                    <label for="saveBeneficiary">Enregistrer ce bénéficiaire</label>
+                  </div>
+
+                  <div class="checkbox-group">
+                    <input type="checkbox" id="instantTransfer" name="instantTransfer">
+                    <label for="instantTransfer">Transfert instantané <span class="fee-badge">+13.4 MAD</span></label>
+                  </div>
+                </div>
+                <!-- Boutons d'action -->
+                <div class="form-actions">
+                  <button type="button" class="btn btn-secondary" id="cancelTransferBtn">
+                    Annuler
+                  </button>
+                  <button type="submit" class="btn btn-primary" id="submitTransferBtn">
+                    <i class="fas fa-paper-plane"></i> Transférer
+                  </button>
+                </div>
+              </form>
+            </div>
+          </section>
+        </div>
+        <!-- Footer -->
+        <footer>
+          <p>&copy; 2026 E-Wallet. Tous droits réservés.</p>
+        </footer>
+
+        <script type="module" src="/src/controllers/dashboard.js"></script>
 </body>
+
 </html>
