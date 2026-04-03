@@ -81,8 +81,6 @@ user.wallet.cards.forEach((card) => {
     sourceCardCharger.appendChild(opt2);
 })
 
-
-
 //annuler transfer - chargement
 cancelTransferBtn.addEventListener('click', () => transfersection.setAttribute('class', 'hidden'));
 closeTransferBtn.addEventListener('click', () => transfersection.setAttribute('class', 'hidden'));
@@ -212,6 +210,14 @@ const checkSolde = (mont) => new Promise((resolve, reject) => {
     }, 3000);
 });
 
+
+const debiter = (mont) => new Promise((resolve) => {
+    setTimeout(() => {
+        user.wallet.balance -= mont;
+        resolve();
+    }, 200);
+});
+
 const debiterCarte = (mont, carte) => new Promise((resolve) => {
     setTimeout(() => {
         const card = getCard(user.account, carte)
@@ -229,14 +235,14 @@ const credit = (benacc, mont) => new Promise((resolve) => {
 });
 
 //transaction credit
-const creerTC = (benacc, mont, card) => {
+const creerTC = (benacc, mont) => {
     let benef = finduserbyaccount(benacc);
     const transaction = {
         id: Math.random(),
         type: 'credit',
         amount: mont,
         date: new Date().toLocaleString(),
-        from: card,
+        from: user.name,
         to: benef.name,
         status: "validee"
     }
@@ -244,14 +250,14 @@ const creerTC = (benacc, mont, card) => {
 }
 
 //transaction debit
-const creerTD = (benacc, mont, carte) => {
+const creerTD = (benacc, mont) => {
     let benef = finduserbyaccount(benacc);
     const transaction = {
         id: Math.random(),
         type: 'debit',
         amount: mont,
         date: new Date().toLocaleString(),
-        from: carte,
+        from: user.name,
         to: benef.name,
         status: "validee"
     }
@@ -269,9 +275,10 @@ function handleTransfert() {
         .then(() =>  //p1
             checkSolde(amt)) //p2
         .then(() => { //p3
-            creerTC(benacc, mont, carte);
-            creerTD(benacc, amt, carte);
-            return debiterCarte(amt, carte); //p4
+            creerTC(benacc, mont);
+            creerTD(benacc, amt);
+            if (carte) return debiterCarte(amt, carte); //p4
+            else return debiter(amt);
         })
         .then(() => credit(benacc, mont))
         .then(() => valider())
@@ -329,7 +336,7 @@ const creerTR = (mont, benacc, carte) => new Promise((resolve, reject) => {
         date: new Date().toLocaleString(),
         from: carte,
         to: ben.name,
-        status:"validee"
+        status: "validee"
     }
     user.wallet.transactions.push(transaction);
     resolve("transaction recharge cree!!");
@@ -362,11 +369,26 @@ submitChargerBtn.addEventListener('click', (e) => {
     handleCharger();
 });
 
-function handleCharger() {
+async function handleCharger() {
     let montant = parseFloat(amountCharger.value);
     let carte = sourceCardCharger.value;
 
-    checkAmount(montant)
+    try {
+        await checkAmount(montant);
+        await checkExpiry(user.account, carte);
+        await checkCardSolde(user.account, montant, carte);
+        await creerTR(montant, user.account, carte);
+        await rechargerBalance(montant);
+        await valider();
+
+
+    } catch (err) {
+        alert(err);
+        creerTRechec(montant, user.account, carte);
+        sessionStorage.setItem("currentUser", JSON.stringify(user));
+        location.reload();
+    }
+    /*checkAmount(montant)
         .then((res) => { console.log(res); return checkExpiry(user.account, carte) })
         .then(res => { console.log(res); return checkCardSolde(user.account, montant, carte) })
         .then((res) => { console.log(res); return creerTR(montant, user.account, carte) })
@@ -377,10 +399,5 @@ function handleCharger() {
             creerTRechec(montant, user.account, carte);
             sessionStorage.setItem("currentUser", JSON.stringify(user));
             location.reload();
-        });
+        });*/
 }
-
-
-
-
-
